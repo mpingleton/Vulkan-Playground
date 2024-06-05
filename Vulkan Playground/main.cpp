@@ -16,12 +16,15 @@
 #include <limits>
 #include <algorithm>
 
+const uint32_t WINDOWWIDTH = 800;
+const uint32_t WINDOWHEIGHT = 600;
+
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
 const std::vector<const char*> deviceExtensions = {
-	"VK_KHR_SWAPCHAIN_EXTENSION_NAME"
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
 #ifdef NDEBUG
@@ -129,7 +132,7 @@ private:
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-		window = glfwCreateWindow(800, 600, "Vulkan", nullptr, nullptr);
+		window = glfwCreateWindow(WINDOWWIDTH, WINDOWHEIGHT, "Vulkan", nullptr, nullptr);
 	}
 
 	void initVulkan() {
@@ -166,6 +169,8 @@ private:
 
 		createInfo.minImageCount = imageCount;
 		createInfo.imageFormat = surfaceFormat.format;
+		createInfo.imageColorSpace = surfaceFormat.colorSpace;
+		createInfo.imageExtent = extent;
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
@@ -338,14 +343,6 @@ private:
 	}
 
 	bool isDeviceSuitable(VkPhysicalDevice device) {
-		VkPhysicalDeviceProperties deviceProperties;
-		vkGetPhysicalDeviceProperties(device, &deviceProperties);
-
-		VkPhysicalDeviceFeatures deviceFeatures;
-		vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
-		// return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader;
-
 		QueueFamilyIndices indices = findQueueFamilies(device);
 		bool extensionsSupported = checkDeviceExtensionSupport(device);
 
@@ -361,7 +358,7 @@ private:
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device) {
 		uint32_t extensionCount;
 		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
-
+		
 		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
 		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
